@@ -3,255 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Tambahan untuk PWA -->
-    <meta name="theme-color" content="#0ea5e9"/>
-    <link rel="manifest" href="manifest.json">
-    <!-- Akhir Tambahan PWA -->
-
-    <title>Aplikasi Latihan Interval Progresif</title>
+    <title>Latihan Interval Progresif</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s ease; }
-        input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
-        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        .stat-card { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 0.75rem; text-align: center; }
-        @keyframes red-flash { 0%, 100% { background-color: #fecaca; } 50% { background-color: #f1f5f9; } }
-        .warning-flash { animation: red-flash 1s infinite; }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent; /* Mencegah highlight saat disentuh */
+        }
+        /* Animasi kedip untuk notifikasi */
+        @keyframes blink-warning {
+            50% { background-color: #ef4444; }
+        }
+        .blinking-warning {
+            animation: blink-warning 1s infinite;
+        }
     </style>
 </head>
-<body class="bg-slate-100 flex items-center justify-center min-h-screen py-8">
+<body class="bg-slate-100 flex items-center justify-center min-h-screen transition-colors duration-300">
 
-    <div class="bg-white w-full max-w-md mx-4 p-6 md:p-8 rounded-2xl shadow-lg">
-        <div class="text-center mb-6">
-            <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Interval Progresif</h1>
-            <p id="status" class="text-lg font-semibold text-sky-600 mt-2 h-7">Atur latihan Anda</p>
-        </div>
-        <div class="my-6 text-center">
-            <p class="text-sm font-medium text-slate-500">Sisa Waktu</p>
-            <p id="timer" class="text-7xl md:text-8xl font-bold text-slate-900 tracking-tight">00:00</p>
-        </div>
-        <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="stat-card">
-                <p class="text-sm font-medium text-slate-500">Target Kecepatan</p>
-                <p id="speed-display" class="text-4xl font-bold text-slate-800">0</p>
-            </div>
-            <div class="stat-card">
-                <p class="text-sm font-medium text-slate-500">Set Ke-</p>
-                <p id="set-display" class="text-4xl font-bold text-slate-800">0</p>
-            </div>
-        </div>
-        <div id="settings" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label for="total-time" class="block text-sm font-medium text-slate-600 text-center">Lama Latihan (menit)</label>
-                    <input type="number" id="total-time" value="30" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 text-lg p-2 text-center">
+    <div class="w-full max-w-md mx-auto p-4 md:p-6">
+        <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            <div id="setup-screen">
+                <h1 class="text-2xl font-bold text-slate-800 text-center">Latihan Interval Progresif</h1>
+                <p class="text-slate-500 text-center mt-2 mb-8">Atur waktu dan kecepatan latihan Anda.</p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="duration" class="block text-sm font-medium text-slate-600 mb-1">Lama Latihan (menit)</label>
+                        <input type="number" id="duration" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-lg text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none" value="30">
+                    </div>
+                    <div>
+                        <label for="intervalTime" class="block text-sm font-medium text-slate-600 mb-1">Interval Waktu (menit)</label>
+                        <input type="number" id="intervalTime" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-lg text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none" value="3">
+                    </div>
+                    <div>
+                        <label for="startSpeed" class="block text-sm font-medium text-slate-600 mb-1">Mulai Kecepatan</label>
+                        <input type="number" id="startSpeed" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-lg text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none" value="2">
+                    </div>
+                    <div>
+                        <label for="speedInterval" class="block text-sm font-medium text-slate-600 mb-1">Interval Kenaikan Kecepatan</label>
+                        <input type="number" id="speedInterval" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-lg text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none" value="3">
+                    </div>
                 </div>
-                <div>
-                    <label for="interval-time" class="block text-sm font-medium text-slate-600 text-center">Interval Waktu (menit)</label>
-                    <input type="number" id="interval-time" value="3" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 text-lg p-2 text-center">
-                </div>
-                <div>
-                    <label for="speed-interval" class="block text-sm font-medium text-slate-600 text-center">Interval Kecepatan</label>
-                    <input type="number" id="speed-interval" value="3" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 text-lg p-2 text-center">
-                </div>
+
+                <button id="start-btn" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-4 rounded-lg mt-8 transition-transform transform active:scale-95">Mulai Latihan</button>
             </div>
-        </div>
-        <div id="controls" class="mt-8 grid grid-cols-1 gap-4">
-             <button id="startBtn" class="w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-transform transform active:scale-95 text-lg">
-                Mulai Latihan
-            </button>
-             <div id="pause-reset-container" class="hidden grid-cols-2 gap-4">
-                <button id="pauseBtn" class="w-full bg-amber-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition-transform transform active:scale-95 text-lg">
-                    Jeda
-                </button>
-                <button id="resetBtn" class="w-full bg-slate-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 transition-transform transform active:scale-95 text-lg">
-                    Reset
-                </button>
+
+            <div id="timer-screen" class="hidden">
+                 <p id="status-text" class="text-center text-lg font-medium text-slate-500 mb-2">Pemanasan</p>
+                <h2 id="current-speed" class="text-6xl md:text-7xl font-bold text-center text-sky-500">2.0</h2>
+                <p class="text-center text-slate-400 font-medium mb-6">Target Kecepatan</p>
+                
+                <div class="text-center my-8">
+                    <p class="text-slate-500">Sisa Waktu</p>
+                    <p id="timer-display" class="text-5xl font-bold text-slate-800">30:00</p>
+                </div>
+                
+                <div id="set-info" class="text-center text-slate-500">Set 1 dari 3</div>
+
+                <div class="flex space-x-4 mt-8">
+                    <button id="pause-resume-btn" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-lg transition-transform transform active:scale-95">Jeda</button>
+                    <button id="reset-btn" class="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-transform transform active:scale-95">Reset</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const statusEl = document.getElementById('status');
-        const timerEl = document.getElementById('timer');
-        const speedDisplayEl = document.getElementById('speed-display');
-        const setDisplayEl = document.getElementById('set-display');
-        const startBtn = document.getElementById('startBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const settingsEl = document.getElementById('settings');
-        const pauseResetContainer = document.getElementById('pause-reset-container');
-        const bodyEl = document.body;
+        // Elemen UI
+        const setupScreen = document.getElementById('setup-screen');
+        const timerScreen = document.getElementById('timer-screen');
+        const startBtn = document.getElementById('start-btn');
+        const pauseResumeBtn = document.getElementById('pause-resume-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const timerDisplay = document.getElementById('timer-display');
+        const currentSpeedDisplay = document.getElementById('current-speed');
+        const statusText = document.getElementById('status-text');
+        const setInfo = document.getElementById('set-info');
 
-        const totalTimeInput = document.getElementById('total-time');
-        const intervalTimeInput = document.getElementById('interval-time');
-        const speedIntervalInput = document.getElementById('speed-interval');
-
-        let mainTimerInterval = null;
+        // Input
+        const durationInput = document.getElementById('duration');
+        const intervalTimeInput = document.getElementById('intervalTime');
+        const startSpeedInput = document.getElementById('startSpeed');
+        const speedIntervalInput = document.getElementById('speedInterval');
+        
+        let timer;
+        let totalSeconds;
+        let remainingSeconds;
         let isPaused = false;
-        let totalWorkoutSeconds = 0;
-        let timeLeft = 0;
-        let intervalSeconds = 0;
-        let speedIncrement = 0;
-        let initialSpeed = 0;
-        let maxSpeed = 0;
+        let audioContext;
 
-        let currentSpeed = 0;
-        let currentSet = 0;
-        let audioCtx;
-
-        function initializeAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Fungsi untuk membuat suara bip
+        function createBeep(freq = 523.25, duration = 0.1) {
+            // Meminta izin audio saat interaksi pertama (jika belum ada)
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
             }
-        }
 
-        function playSound(frequency = 440, duration = 150, type = 'sine') {
-            if (!audioCtx) return;
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
             oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.type = type;
-            oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + (duration / 1000));
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + (duration / 1000));
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.value = freq;
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.01);
+            
+            oscillator.start(audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + duration);
+            oscillator.stop(audioContext.currentTime + duration);
         }
 
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-
-        function updateDisplay() {
-            timerEl.textContent = formatTime(timeLeft);
-            speedDisplayEl.textContent = currentSpeed;
-            setDisplayEl.textContent = currentSet;
-        }
-
+        // Fungsi utama timer
         function tick() {
             if (isPaused) return;
-            timeLeft--;
 
-            const secondsElapsed = totalWorkoutSeconds - timeLeft;
-            let statusText = "Tahan Kecepatan...";
-
-            if (intervalSeconds > 5) {
-                const secondsIntoInterval = (secondsElapsed - 1) % intervalSeconds;
-                const warningTime = intervalSeconds - secondsIntoInterval;
-
-                if (warningTime <= 5 && timeLeft > 0) {
-                    bodyEl.classList.add('warning-flash');
-                    statusText = `Ganti dalam ${warningTime}...`;
-                } else {
-                    bodyEl.classList.remove('warning-flash');
-                }
-            }
+            remainingSeconds--;
             
-            if (secondsElapsed > 0 && secondsElapsed % intervalSeconds === 0 && timeLeft > 0) {
-                playSound(660, 200, 'square');
-                statusText = "Naikkan Kecepatan!";
-                if (currentSpeed >= maxSpeed) {
-                    currentSpeed = initialSpeed;
-                    currentSet++;
+            const totalDuration = parseInt(durationInput.value) * 60;
+            const interval = parseInt(intervalTimeInput.value) * 60;
+            const startSpeed = parseFloat(startSpeedInput.value);
+            const speedBase = parseFloat(speedIntervalInput.value);
+            const timeElapsed = totalDuration - remainingSeconds;
+            
+            // Logika interval
+            const currentIntervalIndex = Math.floor(timeElapsed / interval);
+            const nextIntervalTime = (currentIntervalIndex + 1) * interval;
+            const timeToNextInterval = nextIntervalTime - timeElapsed;
+
+            // Logika kecepatan
+            const speedCycle = Math.floor(currentIntervalIndex / 3);
+            const speedStep = currentIntervalIndex % 3;
+            let currentSpeed = startSpeed + (speedStep * speedBase);
+
+            // Logika set
+            const totalIntervals = Math.ceil(totalDuration / interval);
+            const intervalsPerSet = 3;
+            const totalSets = Math.ceil(totalIntervals / intervalsPerSet);
+            const currentSet = speedCycle + 1;
+
+            setInfo.textContent = `Set ${currentSet} dari ${totalSets}`;
+            currentSpeedDisplay.textContent = currentSpeed.toFixed(1);
+
+            // --- PERUBAHAN LOGIKA SUARA HITUNG MUNDUR ---
+            // Notifikasi kedip dan SUARA SETIAP DETIK 5 detik sebelum ganti
+            if (timeToNextInterval > 0 && timeToNextInterval <= 5 && remainingSeconds > 0) {
+                document.body.classList.add('blinking-warning');
+                statusText.textContent = `Ganti kecepatan dalam ${timeToNextInterval} detik!`;
+
+                // Mainkan suara bip yang berbeda untuk detik terakhir
+                if (timeToNextInterval === 1) {
+                    createBeep(1200, 0.15); // Bip terakhir lebih tinggi
                 } else {
-                    currentSpeed += speedIncrement;
+                    createBeep(800, 0.1); // Bip hitung mundur biasa
                 }
+            } else {
+                document.body.classList.remove('blinking-warning');
+                statusText.textContent = `Jaga Kecepatan`;
+            }
+            // --- AKHIR PERUBAHAN ---
+
+            // Bip saat interval tepat berganti
+            if (timeElapsed > 0 && timeElapsed % interval === 0) {
+                 createBeep(1000, 0.2);
             }
 
-            statusEl.textContent = statusText;
-            updateDisplay();
+            updateTimerDisplay();
 
-            if (timeLeft <= 0) {
-                clearInterval(mainTimerInterval);
-                mainTimerInterval = null;
-                bodyEl.classList.remove('warning-flash');
-                statusEl.textContent = "Latihan Selesai!";
-                playSound(880, 500, 'triangle');
-                resetWorkout();
+            if (remainingSeconds <= 0) {
+                clearInterval(timer);
+                statusText.textContent = "Selesai!";
+                timerDisplay.textContent = "00:00";
+                createBeep(1200, 0.5); // Bip penanda selesai
+                document.body.classList.remove('blinking-warning');
             }
         }
 
-        function startWorkout() {
-            initializeAudio();
-            if (mainTimerInterval) return;
+        function updateTimerDisplay() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
 
-            totalWorkoutSeconds = (parseInt(totalTimeInput.value) || 0) * 60;
-            intervalSeconds = (parseInt(intervalTimeInput.value) || 0) * 60;
-            speedIncrement = parseInt(speedIntervalInput.value) || 0;
+        startBtn.addEventListener('click', () => {
+            // Inisialisasi AudioContext saat user pertama kali berinteraksi
+             if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-            if (totalWorkoutSeconds <= 0 || intervalSeconds <= 0 || speedIncrement <= 0 || totalWorkoutSeconds < intervalSeconds) {
-                statusEl.textContent = "Pengaturan tidak valid!";
+            totalSeconds = parseInt(durationInput.value) * 60;
+            if (isNaN(totalSeconds) || totalSeconds <= 0) {
+                alert("Masukkan durasi yang valid.");
                 return;
             }
-
-            timeLeft = totalWorkoutSeconds;
-            initialSpeed = speedIncrement;
-            maxSpeed = initialSpeed * 3;
-            currentSpeed = initialSpeed;
-            currentSet = 1;
+            remainingSeconds = totalSeconds;
             isPaused = false;
             
-            statusEl.textContent = "Mulai!";
-            updateDisplay();
-            mainTimerInterval = setInterval(tick, 1000);
+            setupScreen.classList.add('hidden');
+            timerScreen.classList.remove('hidden');
 
-            startBtn.classList.add('hidden');
-            pauseResetContainer.classList.remove('hidden');
-            pauseResetContainer.classList.add('grid');
-            pauseBtn.textContent = 'Jeda';
-            settingsEl.style.pointerEvents = 'none';
-            settingsEl.style.opacity = '0.5';
-        }
+            updateTimerDisplay();
+            tick();
+            timer = setInterval(tick, 1000);
+        });
 
-        function pauseWorkout() {
-            if (!mainTimerInterval) return;
+        pauseResumeBtn.addEventListener('click', () => {
             isPaused = !isPaused;
-            pauseBtn.textContent = isPaused ? 'Lanjut' : 'Jeda';
-            statusEl.textContent = isPaused ? "Dijeda" : "Lanjut Latihan!";
-            if(isPaused){
-                bodyEl.classList.remove('warning-flash');
+            if (isPaused) {
+                pauseResumeBtn.textContent = "Lanjut";
+                pauseResumeBtn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
+                pauseResumeBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+            } else {
+                pauseResumeBtn.textContent = "Jeda";
+                pauseResumeBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                pauseResumeBtn.classList.add('bg-amber-500', 'hover:bg-amber-600');
+                tick();
             }
-        }
+        });
 
-        function resetWorkout() {
-            clearInterval(mainTimerInterval);
-            mainTimerInterval = null;
-            isPaused = false;
-            timeLeft = 0;
-            currentSpeed = 0;
-            currentSet = 0;
-
-            bodyEl.classList.remove('warning-flash');
-            statusEl.textContent = "Atur latihan Anda";
-            updateDisplay();
-
-            startBtn.classList.remove('hidden');
-            pauseResetContainer.classList.add('hidden');
-            pauseResetContainer.classList.remove('grid');
-            settingsEl.style.pointerEvents = 'auto';
-            settingsEl.style.opacity = '1';
-        }
-
-        startBtn.addEventListener('click', startWorkout);
-        pauseBtn.addEventListener('click', pauseWorkout);
-        resetBtn.addEventListener('click', resetWorkout);
+        resetBtn.addEventListener('click', () => {
+            clearInterval(timer);
+            timerScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+            document.body.classList.remove('blinking-warning');
+            pauseResumeBtn.textContent = "Jeda";
+            pauseResumeBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+            pauseResumeBtn.classList.add('bg-amber-500', 'hover:bg-amber-600');
+        });
         
-        updateDisplay();
-
-        // Tambahan script untuk mendaftarkan Service Worker
+        // Daftarkan Service Worker untuk PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').then(registration => {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }, err => {
-                    console.log('ServiceWorker registration failed: ', err);
+                    console.log('Service Worker berhasil didaftarkan: ', registration);
+                }).catch(error => {
+                    console.log('Pendaftaran Service Worker gagal: ', error);
                 });
             });
         }
