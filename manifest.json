@@ -1,7 +1,7 @@
 {
   "name": "Latihan Interval Progresif",
   "short_name": "Interval App",
-  "start_url": "interval-progressive-app.html",
+  "start_url": "indexs.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0ea5e9",
@@ -29,4 +29,5 @@
     }
   ]
 }
+
 
