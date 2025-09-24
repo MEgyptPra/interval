@@ -1,10 +1,11 @@
 {
   "name": "Latihan Interval Progresif",
   "short_name": "Interval App",
-  "start_url": "indexs.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0ea5e9",
+  "scope": "/interval/",
   "description": "Aplikasi timer untuk latihan jalan interval progresif.",
   "icons": [
     {
@@ -29,5 +30,6 @@
     }
   ]
 }
+
 
 
