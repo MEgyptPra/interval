@@ -2,7 +2,7 @@ const CACHE_NAME = 'interval-app-cache-v1';
 // Daftar file yang perlu disimpan untuk mode offline
 const urlsToCache = [
   '/',
-  'interval-progressive-app.html',
+  'index.html',
   'manifest.json',
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap'
@@ -37,4 +37,5 @@ self.addEventListener('fetch', event => {
     )
   );
 });
+
 
