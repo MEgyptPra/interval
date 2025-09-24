@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tambahan untuk PWA -->
+    <meta name="theme-color" content="#0ea5e9"/>
+    <link rel="manifest" href="manifest.json">
+    <!-- Akhir Tambahan PWA -->
+
+    <title>Aplikasi Latihan Interval Progresif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s ease; }
+        input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .stat-card { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 0.75rem; text-align: center; }
+        @keyframes red-flash { 0%, 100% { background-color: #fecaca; } 50% { background-color: #f1f5f9; } }
+        .warning-flash { animation: red-flash 1s infinite; }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen py-8">
+
+    <div class="bg-white w-full max-w-md mx-4 p-6 md:p-8 rounded-2xl shadow-lg">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Interval Progresif</h1>
+            <p id="status" class="text-lg font-semibold text-sky-600 mt-2 h-7">Atur latihan Anda</p>
+        </div>
+        <div class="my-6 text-center">
+            <p class="text-sm font-medium text-slate-500">Sisa Waktu</p>
+            <p id="timer" class="text-7xl md:text-8xl font-bold text-slate-900 tracking-tight">00:00</p>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="stat-card">
+                <p class="text-sm font-medium text-slate-500">Target Kecepatan</p>
+                <p id="speed-display" class="text-4xl font-bold text-slate-800">0</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-sm font-medium text-slate-500">Set Ke-</p>
+                <p id="set-display" class="text-4xl font-bold text-slate-800">0</p>
+            </div>
+        </div>
+        <div id="settings" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="total-time" class="block text-sm font-medium text-slate-600 text-center">Lama Latihan (menit)</label>
+                    <input type="number" id="total-time" value="30" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 text-lg p-2 text-center">
+                </div>
+                <div>
+                    <label for="interval-time" class="block text-sm font-medium text-slate-600 text-center">Interval Waktu (menit)</label>
+                    <input type="number" id="interval-time" value="3" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 text-lg p-2 text-center">
+                </div>
+                <div>
+                    <label for="speed-interval" class="block text-sm font-medium text-slate-600 text-center">Interval Kecepatan</label>
+                    <input type="number" id="speed-interval" value="3" class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 text-lg p-2 text-center">
+                </div>
+            </div>
+        </div>
+        <div id="controls" class="mt-8 grid grid-cols-1 gap-4">
+             <button id="startBtn" class="w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-transform transform active:scale-95 text-lg">
+                Mulai Latihan
+            </button>
+             <div id="pause-reset-container" class="hidden grid-cols-2 gap-4">
+                <button id="pauseBtn" class="w-full bg-amber-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition-transform transform active:scale-95 text-lg">
+                    Jeda
+                </button>
+                <button id="resetBtn" class="w-full bg-slate-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 transition-transform transform active:scale-95 text-lg">
+                    Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const timerEl = document.getElementById('timer');
+        const speedDisplayEl = document.getElementById('speed-display');
+        const setDisplayEl = document.getElementById('set-display');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const settingsEl = document.getElementById('settings');
+        const pauseResetContainer = document.getElementById('pause-reset-container');
+        const bodyEl = document.body;
+
+        const totalTimeInput = document.getElementById('total-time');
+        const intervalTimeInput = document.getElementById('interval-time');
+        const speedIntervalInput = document.getElementById('speed-interval');
+
+        let mainTimerInterval = null;
+        let isPaused = false;
+        let totalWorkoutSeconds = 0;
+        let timeLeft = 0;
+        let intervalSeconds = 0;
+        let speedIncrement = 0;
+        let initialSpeed = 0;
+        let maxSpeed = 0;
+
+        let currentSpeed = 0;
+        let currentSet = 0;
+        let audioCtx;
+
+        function initializeAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(frequency = 440, duration = 150, type = 'sine') {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + (duration / 1000));
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + (duration / 1000));
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            timerEl.textContent = formatTime(timeLeft);
+            speedDisplayEl.textContent = currentSpeed;
+            setDisplayEl.textContent = currentSet;
+        }
+
+        function tick() {
+            if (isPaused) return;
+            timeLeft--;
+
+            const secondsElapsed = totalWorkoutSeconds - timeLeft;
+            let statusText = "Tahan Kecepatan...";
+
+            if (intervalSeconds > 5) {
+                const secondsIntoInterval = (secondsElapsed - 1) % intervalSeconds;
+                const warningTime = intervalSeconds - secondsIntoInterval;
+
+                if (warningTime <= 5 && timeLeft > 0) {
+                    bodyEl.classList.add('warning-flash');
+                    statusText = `Ganti dalam ${warningTime}...`;
+                } else {
+                    bodyEl.classList.remove('warning-flash');
+                }
+            }
+            
+            if (secondsElapsed > 0 && secondsElapsed % intervalSeconds === 0 && timeLeft > 0) {
+                playSound(660, 200, 'square');
+                statusText = "Naikkan Kecepatan!";
+                if (currentSpeed >= maxSpeed) {
+                    currentSpeed = initialSpeed;
+                    currentSet++;
+                } else {
+                    currentSpeed += speedIncrement;
+                }
+            }
+
+            statusEl.textContent = statusText;
+            updateDisplay();
+
+            if (timeLeft <= 0) {
+                clearInterval(mainTimerInterval);
+                mainTimerInterval = null;
+                bodyEl.classList.remove('warning-flash');
+                statusEl.textContent = "Latihan Selesai!";
+                playSound(880, 500, 'triangle');
+                resetWorkout();
+            }
+        }
+
+        function startWorkout() {
+            initializeAudio();
+            if (mainTimerInterval) return;
+
+            totalWorkoutSeconds = (parseInt(totalTimeInput.value) || 0) * 60;
+            intervalSeconds = (parseInt(intervalTimeInput.value) || 0) * 60;
+            speedIncrement = parseInt(speedIntervalInput.value) || 0;
+
+            if (totalWorkoutSeconds <= 0 || intervalSeconds <= 0 || speedIncrement <= 0 || totalWorkoutSeconds < intervalSeconds) {
+                statusEl.textContent = "Pengaturan tidak valid!";
+                return;
+            }
+
+            timeLeft = totalWorkoutSeconds;
+            initialSpeed = speedIncrement;
+            maxSpeed = initialSpeed * 3;
+            currentSpeed = initialSpeed;
+            currentSet = 1;
+            isPaused = false;
+            
+            statusEl.textContent = "Mulai!";
+            updateDisplay();
+            mainTimerInterval = setInterval(tick, 1000);
+
+            startBtn.classList.add('hidden');
+            pauseResetContainer.classList.remove('hidden');
+            pauseResetContainer.classList.add('grid');
+            pauseBtn.textContent = 'Jeda';
+            settingsEl.style.pointerEvents = 'none';
+            settingsEl.style.opacity = '0.5';
+        }
+
+        function pauseWorkout() {
+            if (!mainTimerInterval) return;
+            isPaused = !isPaused;
+            pauseBtn.textContent = isPaused ? 'Lanjut' : 'Jeda';
+            statusEl.textContent = isPaused ? "Dijeda" : "Lanjut Latihan!";
+            if(isPaused){
+                bodyEl.classList.remove('warning-flash');
+            }
+        }
+
+        function resetWorkout() {
+            clearInterval(mainTimerInterval);
+            mainTimerInterval = null;
+            isPaused = false;
+            timeLeft = 0;
+            currentSpeed = 0;
+            currentSet = 0;
+
+            bodyEl.classList.remove('warning-flash');
+            statusEl.textContent = "Atur latihan Anda";
+            updateDisplay();
+
+            startBtn.classList.remove('hidden');
+            pauseResetContainer.classList.add('hidden');
+            pauseResetContainer.classList.remove('grid');
+            settingsEl.style.pointerEvents = 'auto';
+            settingsEl.style.opacity = '1';
+        }
+
+        startBtn.addEventListener('click', startWorkout);
+        pauseBtn.addEventListener('click', pauseWorkout);
+        resetBtn.addEventListener('click', resetWorkout);
+        
+        updateDisplay();
+
+        // Tambahan script untuk mendaftarkan Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
+
